@@ -10,13 +10,15 @@ app.use(express.json());
 
 
 app.get("/", (req, res) => {
-  res.send("Backend is running 🚀");
+  res.send("Backend is running");
 });
 
 
 app.get("/github/:username", async (req, res) => {
   try {
     const username = req.params.username;
+
+    console.log("Fetching GitHub user:", username);
 
     const response = await axios.get(
       `https://api.github.com/users/${username}`
@@ -32,12 +34,12 @@ app.get("/github/:username", async (req, res) => {
       [data.login, data.followers, data.following, data.public_repos],
       (err) => {
         if (err) {
-          console.log(err);
+          console.log("DB Insert Error:", err);
           return res.status(500).json({ error: "DB insert failed" });
         }
 
         res.json({
-          message: "Saved to MySQL successfully 🚀",
+          message: "Saved to MySQL successfully",
           username: data.login,
           followers: data.followers,
           repos: data.public_repos
@@ -46,9 +48,20 @@ app.get("/github/:username", async (req, res) => {
     );
 
   } catch (error) {
-    res.status(500).json({ error: "User not found" });
+    console.log("GitHub API Error:", error.message);
+
+    if (error.response && error.response.status === 404) {
+      return res.status(404).json({ error: "GitHub user not found" });
+    }
+
+    if (error.response && error.response.status === 403) {
+      return res.status(403).json({ error: "GitHub API rate limit exceeded" });
+    }
+
+    return res.status(500).json({ error: "Server error while fetching GitHub data" });
   }
 });
+
 
 app.get("/profiles", (req, res) => {
   const sql = "SELECT * FROM profiles";
@@ -62,6 +75,7 @@ app.get("/profiles", (req, res) => {
   });
 });
 
+
 app.get("/profile/:id", (req, res) => {
   const sql = "SELECT * FROM profiles WHERE id = ?";
 
@@ -74,6 +88,9 @@ app.get("/profile/:id", (req, res) => {
   });
 });
 
-app.listen(5000, () => {
-  console.log("Server running on port 5000");
+
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
