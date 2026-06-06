@@ -4,10 +4,10 @@ const db = mysql.createConnection(process.env.MYSQL_URL);
 
 db.connect((err) => {
   if (err) {
-    console.log("DB Connection Failed");
+    console.log("DB Connection Failed ");
     console.log(err);
   } else {
-    console.log("DB Connected Successfully");
+    console.log("DB Connected");
   }
 });
 
