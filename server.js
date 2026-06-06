@@ -8,7 +8,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-
+// Home route
 app.get("/", (req, res) => {
   res.send("Backend is running");
 });
@@ -20,8 +20,14 @@ app.get("/github/:username", async (req, res) => {
 
     console.log("Fetching GitHub user:", username);
 
+
     const response = await axios.get(
-      `https://api.github.com/users/${username}`
+      `https://api.github.com/users/${username}`,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.GITHUB_TOKEN}`
+        }
+      }
     );
 
     const data = response.data;
