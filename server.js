@@ -8,9 +8,26 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Home route
+
 app.get("/", (req, res) => {
   res.send("Backend is running");
+});
+
+
+db.query(`
+CREATE TABLE IF NOT EXISTS profiles (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  username VARCHAR(255),
+  followers INT,
+  following INT,
+  public_repos INT
+)
+`, (err) => {
+  if (err) {
+    console.log("Table create error:", err);
+  } else {
+    console.log("Table ready ✔");
+  }
 });
 
 
@@ -19,7 +36,6 @@ app.get("/github/:username", async (req, res) => {
     const username = req.params.username;
 
     console.log("Fetching GitHub user:", username);
-
 
     const response = await axios.get(
       `https://api.github.com/users/${username}`,
@@ -93,7 +109,6 @@ app.get("/profile/:id", (req, res) => {
     res.json(results[0]);
   });
 });
-
 
 const PORT = process.env.PORT || 5000;
 
